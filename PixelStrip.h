@@ -7,6 +7,16 @@
 // https://github.com/bigjosh/SimpleNeoPixelDemo
 //******************************************************************************
 
+//------------------------------------------------------------------------------
+// Include the right Arduino header
+//
+#if defined(ARDUINO) && (ARDUINO >= 100)
+#	include <Arduino.h>
+#else
+#	if !defined(IRPRONTO)
+#		include <WProgram.h>
+#	endif
+#endif
 
 //------------------------------------------------------------------------------
 // These values depend on which pin your string is connected to and what board you are using 
@@ -34,7 +44,7 @@
 #define PS_T1L 450 // Width of a 1 bit in ns
 #define PS_T0H 400 // Width of a 0 bit in ns
 #define PS_T0L 850 // Width of a 0 bit in ns
-#define PS_RES 6000 // Width of the low gap between bits to cause a frame to latch
+#define PS_RES 40000 // Width of the low gap between bits to cause a frame to latch
 
 //------------------------------------------------------------------------------
 // CPU Frequency
@@ -49,23 +59,13 @@
 #define NS_PER_CYCLE (1000000000L / SYSCLOCK)
 #define NS_TO_CYCLES(n) ((n) / NS_PER_CYCLE)
 
-typedef
-	struct {
-		uint8_t pixels; // pixels count on strip
-		uint8_t pin; // strip pin
-		uint8_t pinBit; // strip pin bit
-	}
-pixelstrip_t;
-
 //------------------------------------------------------------------------------
 // Main class for strip manipulate
 //
 class PixelStrip {
-		pixelstrip_t params;
+		uint16_t pixels;
 	public:
-		PixelStrip (uint8_t pixels);
-		PixelStrip (uint8_t pixels, uint8_t pin);
-		PixelStrip (uint8_t pixels, uint8_t pin, uint8_t pinBit);
+		PixelStrip (uint16_t pixels);
 
 		void sendBit (bool bitVal);
 		void sendByte (uint8_t byte);
@@ -74,4 +74,22 @@ class PixelStrip {
 
 	private:
 		void setup ();
-}
+};
+
+#define SEND_BIT(a_on, a_off) \
+	asm volatile ( \
+		"sbi %[port], %[bit] \n\t" \
+		".rept %[on] \n\t" \
+		"nop \n\t" \
+		".endr \n\t" \
+		"cbi %[port], %[bit] \n\t" \
+		".rept %[off] \n\t" \
+		"nop \n\t" \
+		".endr \n\t" \
+		:: \
+		[port] "I" (_SFR_IO_ADDR(PORTB)), \
+		[bit] "I" (PS_PIXEL_BIT), \
+		[on]  "I" (NS_TO_CYCLES(a_on) - 2), \
+		[off] "I" (NS_TO_CYCLES(a_off) - 2) \
+	)
+
