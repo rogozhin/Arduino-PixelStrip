@@ -31,7 +31,9 @@ void PixelStrip::sendPixel (uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void PixelStrip::show () {
-	_delay_us((PS_RES / 1000UL) + 1);
+	cli();
+	delayMicroseconds((PS_RES / 1000UL) + 1);
+	sei();
 }
 
 void PixelStrip::setup () {

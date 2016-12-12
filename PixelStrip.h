@@ -44,7 +44,8 @@
 #define PS_T1L 450 // Width of a 1 bit in ns
 #define PS_T0H 400 // Width of a 0 bit in ns
 #define PS_T0L 850 // Width of a 0 bit in ns
-#define PS_RES 40000 // Width of the low gap between bits to cause a frame to latch
+#define PS_RES 50000 // Width of the low gap between bits to cause a frame to latch
+// Minimum gap to latch defined in datashit as >50000 ns, but 30000 works good...
 
 //------------------------------------------------------------------------------
 // CPU Frequency
@@ -89,7 +90,7 @@ class PixelStrip {
 		:: \
 		[port] "I" (_SFR_IO_ADDR(PORTB)), \
 		[bit] "I" (PS_PIXEL_BIT), \
-		[on]  "I" (NS_TO_CYCLES(a_on) - 2), \
-		[off] "I" (NS_TO_CYCLES(a_off) - 2) \
+		[on]  "M" (NS_TO_CYCLES(a_on) - 2), \
+		[off] "M" (NS_TO_CYCLES(a_off) - 2) \
 	)
 
