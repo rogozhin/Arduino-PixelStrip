@@ -7,6 +7,9 @@
 // https://github.com/bigjosh/SimpleNeoPixelDemo
 //******************************************************************************
 
+#ifndef PixelStrip_h
+#define PixelStrip_h
+
 //------------------------------------------------------------------------------
 // Include the right Arduino header
 //
@@ -94,3 +97,4 @@ class PixelStrip {
 		[off] "M" (NS_TO_CYCLES(a_off) - 2) \
 	)
 
+#endif
